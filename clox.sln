@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29403.142
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "clox", "clox\clox.vcxproj", "{B9B6116C-B226-49E6-BB2B-2BD05D2DBFCE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B9B6116C-B226-49E6-BB2B-2BD05D2DBFCE}.Debug|x64.ActiveCfg = Debug|x64
+		{B9B6116C-B226-49E6-BB2B-2BD05D2DBFCE}.Debug|x64.Build.0 = Debug|x64
+		{B9B6116C-B226-49E6-BB2B-2BD05D2DBFCE}.Debug|x86.ActiveCfg = Debug|Win32
+		{B9B6116C-B226-49E6-BB2B-2BD05D2DBFCE}.Debug|x86.Build.0 = Debug|Win32
+		{B9B6116C-B226-49E6-BB2B-2BD05D2DBFCE}.Release|x64.ActiveCfg = Release|x64
+		{B9B6116C-B226-49E6-BB2B-2BD05D2DBFCE}.Release|x64.Build.0 = Release|x64
+		{B9B6116C-B226-49E6-BB2B-2BD05D2DBFCE}.Release|x86.ActiveCfg = Release|Win32
+		{B9B6116C-B226-49E6-BB2B-2BD05D2DBFCE}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9E416EE8-8D20-4198-B9D1-ABC6CC88018B}
+	EndGlobalSection
+EndGlobal
