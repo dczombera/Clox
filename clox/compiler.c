@@ -60,6 +60,7 @@ static void literal();
 static void number();
 static uint8_t makeConstant(Value value);
 static void parsePrecedence(Precedence precedence);
+static void string();
 static void unary();
 
 ParseRule rules[] = {
@@ -83,7 +84,7 @@ ParseRule rules[] = {
   { NULL,     binary,  PREC_COMPARISON }, // TOKEN_LESS            
   { NULL,     binary,  PREC_COMPARISON }, // TOKEN_LESS_EQUAL      
   { NULL,     NULL,    PREC_NONE },       // TOKEN_IDENTIFIER      
-  { NULL,     NULL,    PREC_NONE },       // TOKEN_STRING          
+  { string,   NULL,    PREC_NONE },       // TOKEN_STRING          
   { number,   NULL,    PREC_NONE },       // TOKEN_NUMBER          
   { NULL,     NULL,    PREC_NONE },       // TOKEN_AND             
   { NULL,     NULL,    PREC_NONE },       // TOKEN_CLASS           
@@ -284,6 +285,10 @@ static void parsePrecedence(Precedence precedence) {
 		ParseFn infixRule = getRule(parser.previous.type)->infix;
 		infixRule();
 	}
+}
+
+static void string() {
+	emitConstant(OBJ_VAL(copyString(parser.previous.start + 1, parser.previous.length - 2)));
 }
 
 static void unary() {
