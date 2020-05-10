@@ -5,20 +5,25 @@
 #include "value.h"
 
 typedef enum {
+	OP_ADD,
 	OP_CONSTANT,
-	OP_NIL,
-	OP_TRUE,
-	OP_FALSE,
+	OP_DEFINE_GLOBAL,
+	OP_DIVIDE,
 	OP_EQUAL,
+	OP_FALSE,
+	OP_GET_GLOBAL,
+	OP_SET_GLOBAL,
 	OP_GREATER,
 	OP_LESS,
-	OP_ADD,
-	OP_SUBTRACT,
 	OP_MULTIPLY,
-	OP_DIVIDE,
-	OP_NOT,
 	OP_NEGATE,
+	OP_NIL,
+	OP_NOT,
+	OP_POP,
+	OP_PRINT,
 	OP_RETURN,
+	OP_SUBTRACT,
+	OP_TRUE,
 } OpCode;
 
 typedef struct {
