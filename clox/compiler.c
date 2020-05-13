@@ -71,6 +71,7 @@ static void defineVariable(uint8_t gobal);
 static void emitByte(uint8_t byte);
 static void emitBytes(uint8_t byte1, uint8_t byte2);
 static int emitJump(uint8_t instruction);
+static void emitLoop(int loopStart);
 static void endCompiler();
 static void endScope();
 static void emitConstant(Value value);
@@ -101,6 +102,7 @@ static void string(bool canAssign);
 static void synchronize();
 static void varDeclaration();
 static void variable(bool canAccess);
+static void whileStatement();
 static void unary(bool canAssign);
 
 ParseRule rules[] = {
@@ -395,6 +397,9 @@ static void statement() {
 	else if (match(TOKEN_IF)) {
 		ifStatement();
 	}
+	else if (match(TOKEN_WHILE)) {
+		whileStatement();
+	}
 	else if (match(TOKEN_LEFT_BRACE)) {
 		beginScope();
 		block();
@@ -443,6 +448,23 @@ static void varDeclaration() {
 	consume(TOKEN_SEMICOLON, "Expect ';' after variable declaration");
 
 	defineVariable(global);
+}
+
+static void whileStatement() {
+	int loopStart = currentChunk()->count;
+
+	consume(TOKEN_LEFT_PAREN, "Expect '(' after while");
+	expression();
+	consume(TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
+
+	int exitJump = emitJump(OP_JUMP_IF_FALSE);
+
+	emitByte(OP_POP);
+	statement();
+	emitLoop(loopStart);
+
+	patchJump(exitJump);
+	emitByte(OP_POP);
 }
 
 // Expression related functions
@@ -614,6 +636,17 @@ static int emitJump(uint8_t instruction) {
 	emitByte(0xff);
 	emitByte(0xff);
 	return currentChunk()->count - 2;
+}
+
+
+static void emitLoop(int loopStart) {
+	emitByte(OP_LOOP);
+
+	int jump = currentChunk()->count - loopStart + 2;
+	if (jump > UINT16_MAX) error("Loop body too large.");
+
+	emitByte((jump >> 8) & 0xff);
+	emitByte(jump & 0xff);
 }
 
 static void emitReturn() {
