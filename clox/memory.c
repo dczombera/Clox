@@ -18,6 +18,8 @@ void freeObject(Obj* object) {
 		FREE(ObjString, string);
 		break;
 	}
+	case OBJ_NATIVE:
+		FREE(ObjNative, object);
 	}
 }
 
