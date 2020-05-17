@@ -494,8 +494,8 @@ static void printStatement() {
 }
 
 static int resolveLocal(Compiler* compiler, Token* name) {
-	for (int i = current->localCount - 1; i >= 0; i--) {
-		Local* local = &current->locals[i];
+	for (int i = compiler->localCount - 1; i >= 0; i--) {
+		Local* local = &compiler->locals[i];
 
 		if (identifiersEqual(name, &local->name)) {
 			if (local->depth == -1) {
