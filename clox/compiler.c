@@ -674,7 +674,7 @@ static void function(FunctionType type) {
 
 	// Create the function object.
 	ObjFunction* function = endCompiler();
-	emitConstant(OBJ_VAL(function));
+	emitBytes(OP_CLOSURE, makeConstant(OBJ_VAL(function)));
 }
 
 static ParseRule* getRule(TokenType type) {
