@@ -25,6 +25,8 @@ void markObject(Obj* object) {
 		vm.grayCapacity = GROW_CAPACITY(vm.grayCapacity);
 		vm.grayStack = realloc(vm.grayStack, sizeof(Obj*) * vm.grayCapacity);
 	}
+
+	vm.grayStack[vm.grayCount++] = object;
 }
 
 void markValue(Value value) {
