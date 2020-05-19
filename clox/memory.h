@@ -18,7 +18,10 @@
 #define FREE_ARRAY(type, pointer, oldCapacity) \
 	reallocate(pointer, sizeof(type)* (oldCapacity), 0)
 
+void collectGarbage();
 void freeObjects();
+void markObject(Obj* object);
+void markValue(Value value);
 void* reallocate(void* previous, size_t oldSize, size_t newSize);
 
 #endif // !clox_memory_h
