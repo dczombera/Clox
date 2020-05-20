@@ -2,9 +2,13 @@
 
 #include "chunk.h"
 #include "memory.h"
+#include "vm.h"
 
 int addConstant(Chunk* chunk, Value value) {
+	// Push to make it visible to GC during marking phase
+	push(value);
 	writeValueArray(&chunk->constants, value);
+	pop(value);
 	return chunk->constants.count - 1;
 }
 
