@@ -13,7 +13,7 @@
 	(type*)reallocate(previous, sizeof(type)* (oldCapacity), sizeof(type)* (capacity))
 
 #define FREE(type, pointer) \
-	reallocate(pointer, sizeof(pointer), 0)
+	reallocate(pointer, sizeof(type), 0)
 
 #define FREE_ARRAY(type, pointer, oldCapacity) \
 	reallocate(pointer, sizeof(type)* (oldCapacity), 0)

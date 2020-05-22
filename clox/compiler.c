@@ -81,6 +81,7 @@ static uint8_t argumentList();
 static void beginScope();
 static void binary(bool canAssign);
 static bool check(TokenType type);
+static void classDeclaration();
 static void block();
 static void call(bool canAssign);
 static void consume(TokenType type, const char* message);
@@ -340,8 +341,23 @@ static void block() {
 	consume(TOKEN_RIGHT_BRACE, "Expect '}' after block.");
 }
 
+static void classDeclaration() {
+	consume(TOKEN_IDENTIFIER, "Expect class name.");
+	uint8_t nameConstant = identifierConstant(&parser.previous);
+
+	declareVariable();
+
+	emitBytes(OP_CLASS, nameConstant);
+	defineVariable(nameConstant);
+
+	consume(TOKEN_LEFT_BRACE, "Expect '{' after class body.");
+	consume(TOKEN_RIGHT_BRACE, "Expect '}' after class body.");
+}
 static void declaration() {
-	if (match(TOKEN_FUN)) {
+	if (match(TOKEN_CLASS)) {
+		classDeclaration();
+	}
+	else if (match(TOKEN_FUN)) {
 		funDeclaration();
 	}
 	else if (match(TOKEN_VAR)) {
