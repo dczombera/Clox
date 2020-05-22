@@ -89,6 +89,7 @@ static Chunk* currentChunk();
 static void declaration();
 static void declareVariable();
 static void defineVariable(uint8_t gobal);
+static void dot(bool canAssign);
 static void emitByte(uint8_t byte);
 static void emitBytes(uint8_t byte1, uint8_t byte2);
 static int emitJump(uint8_t instruction);
@@ -138,7 +139,7 @@ ParseRule rules[] = {
   { NULL,     NULL,    PREC_NONE },      // TOKEN_LEFT_BRACE
   { NULL,     NULL,    PREC_NONE },       // TOKEN_RIGHT_BRACE     
   { NULL,     NULL,    PREC_NONE },       // TOKEN_COMMA           
-  { NULL,     NULL,    PREC_NONE },       // TOKEN_DOT             
+  { NULL,     dot,    PREC_CALL },       // TOKEN_DOT             
   { unary,    binary,  PREC_TERM },       // TOKEN_MINUS           
   { NULL,     binary,  PREC_TERM },       // TOKEN_PLUS            
   { NULL,     NULL,    PREC_NONE },       // TOKEN_SEMICOLON       
@@ -720,6 +721,19 @@ static void call(bool canAssign) {
 
 static Chunk* currentChunk() {
 	return &current->function->chunk;
+}
+
+static void dot(bool canAssign) {
+	consume(TOKEN_IDENTIFIER, "Expect property name after '.'.");
+	uint8_t name = identifierConstant(&parser.previous);
+
+	if (canAssign && match(TOKEN_EQUAL)) {
+		expression();
+		emitBytes(OP_SET_PROPERTY, name);
+	}
+	else {
+		emitBytes(OP_GET_PROPERTY, name);
+	}
 }
 
 static void expression() {
