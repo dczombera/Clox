@@ -53,6 +53,7 @@ typedef struct {
 
 typedef enum {
 	TYPE_FUNCTION,
+	TYPE_METHOD,
 	TYPE_SCRIPT
 } FunctionType;
 
@@ -67,9 +68,16 @@ typedef struct Compiler {
 	int scopeDepth;
 } Compiler;
 
+typedef struct ClassCompiler {
+	struct ClassCompiler* enclosing;
+	Token name;
+} ClassCompiler;
+
 Parser parser;
 
 Compiler* current = NULL;
+
+ClassCompiler* currentClass = NULL;
 
 Chunk* compilingChunk;
 
@@ -128,6 +136,7 @@ static int resolveUpvalue(Compiler* compiler, Token* name);
 static void returnStatement();
 static void statement();
 static void string(bool canAssign);
+static void this_(bool canAssign);
 static void synchronize();
 static void varDeclaration();
 static void variable(bool canAccess);
@@ -154,7 +163,7 @@ ParseRule rules[] = {
   { NULL,     binary,  PREC_COMPARISON }, // TOKEN_GREATER_EQUAL   
   { NULL,     binary,  PREC_COMPARISON }, // TOKEN_LESS            
   { NULL,     binary,  PREC_COMPARISON }, // TOKEN_LESS_EQUAL      
-  { variable,     NULL,    PREC_NONE },       // TOKEN_IDENTIFIER      
+  { variable,     NULL,    PREC_NONE },   // TOKEN_IDENTIFIER      
   { string,   NULL,    PREC_NONE },       // TOKEN_STRING          
   { number,   NULL,    PREC_NONE },       // TOKEN_NUMBER          
   { NULL,     and_,    PREC_AND  },       // TOKEN_AND             
@@ -169,7 +178,7 @@ ParseRule rules[] = {
   { NULL,     NULL,    PREC_NONE },       // TOKEN_PRINT           
   { NULL,     NULL,    PREC_NONE },       // TOKEN_RETURN          
   { NULL,     NULL,    PREC_NONE },       // TOKEN_SUPER           
-  { NULL,     NULL,    PREC_NONE },       // TOKEN_THIS            
+  { this_,     NULL,    PREC_NONE },       // TOKEN_THIS            
   { literal,  NULL,    PREC_NONE },       // TOKEN_TRUE            
   { NULL,     NULL,    PREC_NONE },       // TOKEN_VAR             
   { NULL,     NULL,    PREC_NONE },       // TOKEN_WHILE           
@@ -194,8 +203,14 @@ static void initCompiler(Compiler* compiler, FunctionType type) {
 	Local* local = &current->locals[current->localCount++];
 	local->depth = 0;
 	local->isCaptured = false;
-	local->name.start = "";
-	local->name.length = 0;
+	if (type != TYPE_FUNCTION) {
+		local->name.start = "this";
+		local->name.length = 4;
+	}
+	else {
+		local->name.start = "";
+		local->name.length = 0;
+	}
 }
 
 ObjFunction* compile(const char* source) {
@@ -353,6 +368,11 @@ static void classDeclaration() {
 	emitBytes(OP_CLASS, nameConstant);
 	defineVariable(nameConstant);
 
+	ClassCompiler classCompiler;
+	classCompiler.name = className;
+	classCompiler.enclosing = currentClass;
+	currentClass = &classCompiler;
+
 	namedVariable(className, false);
 	consume(TOKEN_LEFT_BRACE, "Expect '{' after class body.");
 	while (!check(TOKEN_RIGHT_BRACE) && !check(TOKEN_EOF)) {
@@ -361,6 +381,8 @@ static void classDeclaration() {
 
 	consume(TOKEN_RIGHT_BRACE, "Expect '}' after class body.");
 	emitByte(OP_POP);
+
+	currentClass = currentClass->enclosing;
 }
 static void declaration() {
 	if (match(TOKEN_CLASS)) {
@@ -804,7 +826,7 @@ static void literal(bool canAssign) {
 static void method() {
 	consume(TOKEN_IDENTIFIER, "Expect method name.");
 	uint8_t constant = identifierConstant(&parser.previous);
-	function(TYPE_FUNCTION);
+	function(TYPE_METHOD);
 	emitBytes(OP_METHOD, constant);
 }
 
@@ -893,6 +915,15 @@ static void unary(bool canAssign) {
 
 static void variable(bool canAssign) {
 	namedVariable(parser.previous, canAssign);
+}
+
+static void this_(bool canAssign) {
+	if (currentClass == NULL) {
+		error("Cannot use 'this' outside of a class.");
+		return;
+	}
+
+	variable(false);
 }
 
 // Code generation related functions
