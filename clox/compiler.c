@@ -72,6 +72,7 @@ typedef struct Compiler {
 typedef struct ClassCompiler {
 	struct ClassCompiler* enclosing;
 	Token name;
+	bool hasSuperclass;
 } ClassCompiler;
 
 Parser parser;
@@ -137,6 +138,7 @@ static int resolveUpvalue(Compiler* compiler, Token* name);
 static void returnStatement();
 static void statement();
 static void string(bool canAssign);
+static Token syntheticToken(const char* text);
 static void this_(bool canAssign);
 static void synchronize();
 static void varDeclaration();
@@ -371,6 +373,7 @@ static void classDeclaration() {
 
 	ClassCompiler classCompiler;
 	classCompiler.name = className;
+	classCompiler.hasSuperclass = false;
 	classCompiler.enclosing = currentClass;
 	currentClass = &classCompiler;
 
@@ -382,8 +385,15 @@ static void classDeclaration() {
 		}
 
 		variable(false);
+
+		// Make super class object a local variable
+		beginScope();
+		addLocal(syntheticToken("super"));
+		defineVariable(0);
+
 		namedVariable(className, false);
 		emitByte(OP_INHERIT);
+		classCompiler.hasSuperclass = true;
 	}
 
 	namedVariable(className, false);
@@ -394,6 +404,10 @@ static void classDeclaration() {
 
 	consume(TOKEN_RIGHT_BRACE, "Expect '}' after class body.");
 	emitByte(OP_POP);
+
+	if (classCompiler.hasSuperclass) {
+		endScope();
+	}
 
 	currentClass = currentClass->enclosing;
 }
@@ -469,7 +483,6 @@ static void expressionStatement() {
 	consume(TOKEN_SEMICOLON, "Expect ';' after expression.");
 	emitByte(OP_POP);
 }
-
 
 static void forStatement() {
 	beginScope();
@@ -923,6 +936,13 @@ static void parsePrecedence(Precedence precedence) {
 
 static void string(bool canAssign) {
 	emitConstant(OBJ_VAL(copyString(parser.previous.start + 1, parser.previous.length - 2)));
+}
+
+static Token syntheticToken(const char* text) {
+	Token token;
+	token.start = text;
+	token.length = (int)strlen(text);
+	return token;
 }
 
 static void unary(bool canAssign) {
