@@ -112,7 +112,7 @@ void markObject(Obj* object) {
 }
 
 void markValue(Value value) {
-	if (!IS_OBJECT(value)) return;
+	if (!IS_OBJ(value)) return;
 	markObject(AS_OBJ(value));
 }
 

@@ -108,6 +108,6 @@ void printObject(Value value);
 ObjString* takeString(const char* chars, int length);
 
 static inline bool isObjType(Value value, ObjType type) {
-	return IS_OBJECT(value) && AS_OBJ(value)->type == type;
+	return IS_OBJ(value) && AS_OBJ(value)->type == type;
 }
 #endif // !clox_object_h
